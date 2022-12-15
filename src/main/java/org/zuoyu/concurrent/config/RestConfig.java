@@ -3,9 +3,6 @@ package org.zuoyu.concurrent.config;
 
 import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
 
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -18,12 +15,13 @@ import org.springframework.web.client.RestTemplate;
  * @Version 1.0
  */
 @Configuration
-@AutoConfigureBefore(RestTemplateAutoConfiguration.class)
 public class RestConfig {
 
 	@Bean
-	public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+	public RestTemplate restTemplate() {
 		FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-		return restTemplateBuilder.messageConverters(converter).build();
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.getMessageConverters().add(converter);
+		return restTemplate;
 	}
 }

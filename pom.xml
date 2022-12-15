@@ -15,7 +15,7 @@
 	<description>模拟高并发用于测试</description>
 	<properties>
 		<java.version>1.8</java.version>
-		<fastjson.version>2.0.12</fastjson.version>
+		<fastjson.version>2.0.20</fastjson.version>
 		<guava.version>31.1-jre</guava.version>
 		<hutool.version>5.8.5</hutool.version>
 	</properties>
@@ -79,6 +79,12 @@
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

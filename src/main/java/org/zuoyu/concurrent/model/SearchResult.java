@@ -1,5 +1,7 @@
 package org.zuoyu.concurrent.model;
 
+import org.zuoyu.concurrent.model.vo.direct.vo.CtripQDirectVo;
+
 import org.springframework.data.elasticsearch.annotations.Document;
 
 /**
@@ -10,7 +12,26 @@ import org.springframework.data.elasticsearch.annotations.Document;
  * @Version 1.0
  */
 @Document(indexName = "search_result")
-public class SearchResult extends Result{
+public class SearchResult extends Result<CtripQDirectVo.CtripQSearchResponse> {
 
 	private static final long serialVersionUID = -1155143730228105657L;
+
+	public SearchResult() {
+		super();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
 }
