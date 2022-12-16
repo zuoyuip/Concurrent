@@ -1,7 +1,5 @@
 package org.zuoyu.concurrent.model;
 
-import java.util.Date;
-
 import cn.hutool.core.util.IdUtil;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -30,7 +28,7 @@ public class Result<T> extends ElasticsearchBaseEntity<String> {
 	/**
 	 * 时间
 	 */
-	private Date dateTime;
+	private Long dateTime;
 
 	/**
 	 * 请求结果状态(1 成功； 2 失败 ； 3 超时)

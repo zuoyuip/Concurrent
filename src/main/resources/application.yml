@@ -2,8 +2,8 @@ spring:
   elasticsearch:
     uris:
       - 47.101.39.4:9200
-    username: 111
-    password: 111
+    username: root
+    password: root
     connection-timeout: 10
   redis:
     lettuce:
