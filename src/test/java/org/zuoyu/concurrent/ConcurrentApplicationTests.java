@@ -3,11 +3,13 @@ package org.zuoyu.concurrent;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.google.common.base.Stopwatch;
 import org.junit.jupiter.api.Test;
 import org.zuoyu.concurrent.constant.Modules;
 import org.zuoyu.concurrent.model.SearchResult;
@@ -63,15 +65,20 @@ class ConcurrentApplicationTests {
 	}
 
 	@Test
-	void clearSearchResult() {
-
+	void timeOutQuery() {
+		DateTime start = DateUtil.parse("2022-12-23 16:00:00");
+		DateTime end = DateUtil.parse("2022-12-23 18:00:00");
+		searchService.timeOutQuery(start, end);
 	}
 
 	@Test
 	void searchResults() {
-		DateTime start = DateUtil.parse("2022-12-16 10:00:00");
-		DateTime end = DateUtil.parse("2022-12-16 16:00:00");
+		DateTime start = DateUtil.parse("2022-12-23 10:00:00");
+		DateTime end = DateUtil.parse("2022-12-23 16:00:00");
+		Stopwatch stopwatch = Stopwatch.createStarted();
 		List<SearchResult> searchResults = searchService.searchResults(start, end);
 		System.out.println(searchResults.size());
+		stopwatch.stop();
+		System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS));
 	}
 }

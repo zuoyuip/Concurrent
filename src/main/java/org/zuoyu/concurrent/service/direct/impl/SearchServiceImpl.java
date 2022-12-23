@@ -20,6 +20,15 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedLongTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.metrics.ParsedStats;
+import org.elasticsearch.search.aggregations.metrics.Stats;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.xcontent.XContentBuilder;
 import org.zuoyu.concurrent.constant.Modules;
 import org.zuoyu.concurrent.constant.Status;
 import org.zuoyu.concurrent.model.SearchResult;
@@ -32,8 +41,8 @@ import org.zuoyu.concurrent.utils.ConcurrencyUtil;
 import org.zuoyu.concurrent.utils.ReqBuilderUtil;
 import org.zuoyu.concurrent.utils.Results;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.AggregationsContainer;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -41,6 +50,7 @@ import org.springframework.data.elasticsearch.core.SearchScrollHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,7 +58,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.annotation.RequestScope;
 
 /**
  * @Description TODO
@@ -58,11 +67,12 @@ import org.springframework.web.context.annotation.RequestScope;
  * @Version 1.0
  */
 @Service
-@RequestScope
 public class SearchServiceImpl implements SearchService {
 
-	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/search";
-//	private static final String URL = "http://tts.justgotrip.cn:8087/international/ctrip_szjz/search";
+	//	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/search";
+	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
+
+	private static final String SUCCESS = "成功";
 
 	private static final long TIME_OUT = 7000;
 
@@ -115,6 +125,12 @@ public class SearchServiceImpl implements SearchService {
 				searchResult.setData(body);
 				if (Objects.nonNull(body)) {
 					searchResult.setMessage(body.getMsg());
+					if (body.getMsg().contains(SUCCESS)) {
+						searchResult.setIsValid(Boolean.TRUE);
+					}
+					else {
+						searchResult.setIsValid(Boolean.FALSE);
+					}
 				}
 			}
 			else {
@@ -149,7 +165,7 @@ public class SearchServiceImpl implements SearchService {
 	public List<SearchResult> searchResults(@NonNull Date start, @NonNull Date end) {
 		final int pageSize = 10000;
 		List<String> scrollIds = Lists.newArrayList();
-		Results.Search scrollStart = scrollStart(start, end, pageSize);
+		Results.Search scrollStart = scrollStart(start, end);
 		List<SearchResult> searchResults = scrollStart.getSearchResults();
 		String scrollId = scrollStart.getScrollId();
 
@@ -171,15 +187,14 @@ public class SearchServiceImpl implements SearchService {
 	 * 初次查询
 	 * @param start - 开始时间
 	 * @param end - 结束时间
-	 * @param pageSize - 查询个数
 	 * @return - 结果
 	 */
 	@NonNull
-	private Results.Search scrollStart(@NonNull Date start, @NonNull Date end, int pageSize) {
+	private Results.Search scrollStart(@NonNull Date start, @NonNull Date end) {
 		// 设置滚动id的存在时间
 		long scrollTimeInMillis = 30 * 1000;
 		SearchScrollHits<SearchResult> searchHits = elasticsearchRestTemplate
-				.searchScrollStart(scrollTimeInMillis, nativeSearchQuery(start, end, pageSize), SearchResult.class, indexCoordinates);
+				.searchScrollStart(scrollTimeInMillis, nativeSearchQuery(start, end, 10000), SearchResult.class, indexCoordinates);
 
 		if (searchHits.hasSearchHits()) {
 			List<SearchResult> searchResults = searchHits.get().map(SearchHit::getContent)
@@ -229,5 +244,24 @@ public class SearchServiceImpl implements SearchService {
 		// 设置每页数据量
 		nativeSearchQuery.setMaxResults(pageSize);
 		return nativeSearchQuery;
+	}
+
+	/**
+	 * 关于超时信息的数据
+	 * @param start - 起始时间
+	 * @param end - 结束时间
+	 * @return 聚合结果
+	 */
+	@Override
+	public Stats timeOutQuery(@NonNull Date start, @NonNull Date end) {
+		StatsAggregationBuilder statsAggregationBuilder = AggregationBuilders.stats("stats").field("timeOut");
+		Query query = new NativeSearchQueryBuilder().withAggregations(statsAggregationBuilder).build();
+		SearchHits<SearchResult> searchHits = elasticsearchRestTemplate.search(query, SearchResult.class);
+		if (searchHits.hasAggregations()) {
+			AggregationsContainer<?> aggregationsContainer = searchHits.getAggregations();
+			Aggregations aggregations = (Aggregations) Objects.requireNonNull(aggregationsContainer).aggregations();
+			return aggregations.get("stats");
+		}
+		return new ParsedStats();
 	}
 }

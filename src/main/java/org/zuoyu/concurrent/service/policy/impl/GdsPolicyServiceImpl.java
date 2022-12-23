@@ -8,12 +8,11 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson2.JSONObject;
 import org.zuoyu.concurrent.constant.Modules;
 import org.zuoyu.concurrent.model.vo.GdsPolicy;
-import org.zuoyu.concurrent.service.policy.GdsPolicyService;
 import org.zuoyu.concurrent.service.RedisService;
+import org.zuoyu.concurrent.service.policy.GdsPolicyService;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.RequestScope;
 
 /**
  * @Description TODO
@@ -23,7 +22,6 @@ import org.springframework.web.context.annotation.RequestScope;
  * @Version 1.0
  */
 @Service
-@RequestScope
 public class GdsPolicyServiceImpl implements GdsPolicyService {
 
 	private static final String KEY = "gds:policy";

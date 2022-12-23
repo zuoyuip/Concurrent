@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.zuoyu.concurrent.model.base.ElasticsearchBaseEntity;
 
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 /**
  * @Description TODO 查询结果
  * @Author z
@@ -23,36 +26,49 @@ public class Result<T> extends ElasticsearchBaseEntity<String> {
 	/**
 	 * 所属模块
 	 */
+	@Field(type = FieldType.Keyword)
 	private String module;
 
 	/**
 	 * 时间
 	 */
+	@Field(type = FieldType.Long)
 	private Long dateTime;
 
 	/**
 	 * 请求结果状态(1 成功； 2 失败 ； 3 超时)
 	 */
+	@Field(type = FieldType.Integer)
 	private Integer status;
 
 	/**
 	 * 耗时
 	 */
+	@Field(type = FieldType.Integer)
 	private Long timeOut;
 
 	/**
 	 * 信息
 	 */
+	@Field(type = FieldType.Keyword)
 	private String message;
+
+	/**
+	 * 是否有效
+	 */
+	@Field(type = FieldType.Boolean)
+	private Boolean isValid;
 
 	/**
 	 * 状态码
 	 */
+	@Field(type = FieldType.Integer)
 	private Integer code;
 
 	/**
 	 * 结果
 	 */
+	@Field(type = FieldType.Auto)
 	private T data;
 
 	public Result() {

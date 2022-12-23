@@ -28,7 +28,9 @@ public final class ReqBuilderUtil {
 	/**
 	 * 航班时间格式
 	 */
-	private static final String FLIGHT_DATE_PATTERN = "yyyyMMddHHmm";
+	private static final String FLIGHT_DATE_PATTERN = "yyyyMMdd";
+
+	private static final String CID = "szjzkj_gj";
 
 	/**
 	 * 获取请求集合
@@ -81,6 +83,7 @@ public final class ReqBuilderUtil {
 		ctripSearchReq.setChildNumber(1);
 		ctripSearchReq.setChannel(gdsPolicy.getChannel());
 		ctripSearchReq.setRequestSource(3);
+		ctripSearchReq.setCid(CID);
 		return ctripSearchReq;
 	}
 }
