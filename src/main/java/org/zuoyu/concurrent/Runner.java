@@ -1,5 +1,6 @@
 package org.zuoyu.concurrent;
 
+import org.zuoyu.concurrent.model.SearchAggregation;
 import org.zuoyu.concurrent.model.SearchResult;
 
 import org.springframework.boot.CommandLineRunner;
@@ -33,10 +34,18 @@ public class Runner implements CommandLineRunner {
 	 */
 	@Override
 	public void run(String... args) throws Exception {
-		IndexOperations searchIndexOperations = elasticsearchRestTemplate.indexOps(SearchResult.class);
-		if (!searchIndexOperations.exists()){
-			searchIndexOperations.create();
-			searchIndexOperations.putMapping();
+		// 询价结果
+		IndexOperations searchResultIndexOperations = elasticsearchRestTemplate.indexOps(SearchResult.class);
+		if (!searchResultIndexOperations.exists()) {
+			searchResultIndexOperations.create();
+			searchResultIndexOperations.putMapping();
+		}
+
+		// 询价聚合
+		IndexOperations searchAggregationIndexOperations = elasticsearchRestTemplate.indexOps(SearchAggregation.class);
+		if (!searchAggregationIndexOperations.exists()) {
+			searchAggregationIndexOperations.create();
+			searchAggregationIndexOperations.putMapping();
 		}
 	}
 }

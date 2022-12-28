@@ -20,15 +20,11 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedLongTerms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedStats;
 import org.elasticsearch.search.aggregations.metrics.Stats;
 import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
-import org.elasticsearch.xcontent.XContentBuilder;
 import org.zuoyu.concurrent.constant.Modules;
 import org.zuoyu.concurrent.constant.Status;
 import org.zuoyu.concurrent.model.SearchResult;
@@ -194,7 +190,7 @@ public class SearchServiceImpl implements SearchService {
 		// 设置滚动id的存在时间
 		long scrollTimeInMillis = 30 * 1000;
 		SearchScrollHits<SearchResult> searchHits = elasticsearchRestTemplate
-				.searchScrollStart(scrollTimeInMillis, nativeSearchQuery(start, end, 10000), SearchResult.class, indexCoordinates);
+				.searchScrollStart(scrollTimeInMillis, nativeSearchQuery(start, end), SearchResult.class, indexCoordinates);
 
 		if (searchHits.hasSearchHits()) {
 			List<SearchResult> searchResults = searchHits.get().map(SearchHit::getContent)
@@ -213,7 +209,7 @@ public class SearchServiceImpl implements SearchService {
 	@NonNull
 	private Results.Search scrollNext(String scrollId) {
 		// 设置滚动id的存在时间
-		long scrollTimeInMillis = 10 * 1000;
+		long scrollTimeInMillis = 30 * 1000;
 		SearchScrollHits<SearchResult> searchHits = elasticsearchRestTemplate
 				.searchScrollContinue(scrollId, scrollTimeInMillis, SearchResult.class, indexCoordinates);
 
@@ -229,11 +225,10 @@ public class SearchServiceImpl implements SearchService {
 	 * 构建查询
 	 * @param start - 开始时间
 	 * @param end - 结束时间
-	 * @param pageSize - 查询个数
 	 * @return - 结果
 	 */
 	@NonNull
-	private NativeSearchQuery nativeSearchQuery(@NonNull Date start, @NonNull Date end, int pageSize) {
+	private NativeSearchQuery nativeSearchQuery(@NonNull Date start, @NonNull Date end) {
 		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 		// 构建查询条件
 		RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("dateTime")
@@ -242,7 +237,7 @@ public class SearchServiceImpl implements SearchService {
 		NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.withSort(Sort.by("dateTime"))
 				.withQuery(rangeQueryBuilder).build();
 		// 设置每页数据量
-		nativeSearchQuery.setMaxResults(pageSize);
+		nativeSearchQuery.setMaxResults(10000);
 		return nativeSearchQuery;
 	}
 
@@ -255,7 +250,10 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public Stats timeOutQuery(@NonNull Date start, @NonNull Date end) {
 		StatsAggregationBuilder statsAggregationBuilder = AggregationBuilders.stats("stats").field("timeOut");
-		Query query = new NativeSearchQueryBuilder().withAggregations(statsAggregationBuilder).build();
+		// 构建查询条件
+		RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("dateTime")
+				.from(start.getTime(), false).to(end.getTime(), false);
+		Query query = new NativeSearchQueryBuilder().withAggregations(statsAggregationBuilder).withQuery(rangeQueryBuilder).build();
 		SearchHits<SearchResult> searchHits = elasticsearchRestTemplate.search(query, SearchResult.class);
 		if (searchHits.hasAggregations()) {
 			AggregationsContainer<?> aggregationsContainer = searchHits.getAggregations();

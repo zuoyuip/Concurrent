@@ -23,4 +23,4 @@ spring:
         - 192.168.1.99:7006
       max-redirects: 3
     password: love@hmyd
-    timeout: 6000
+    timeout: 20000

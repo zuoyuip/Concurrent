@@ -36,7 +36,7 @@ public class Result<T> extends ElasticsearchBaseEntity<String> {
 	private Long dateTime;
 
 	/**
-	 * 请求结果状态(1 成功； 2 失败 ； 3 超时)
+	 * 请求结果状态(1 成功； 0 失败 ； 2 超时)
 	 */
 	@Field(type = FieldType.Integer)
 	private Integer status;
