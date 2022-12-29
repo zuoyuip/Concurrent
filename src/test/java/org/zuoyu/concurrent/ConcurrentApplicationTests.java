@@ -88,7 +88,7 @@ class ConcurrentApplicationTests {
 	@Test
 	void timeOutQuery() {
 		DateTime start = DateUtil.parse("2022-12-23 16:00:00");
-		DateTime end = DateUtil.parse("2022-12-23 18:00:00");
+		DateTime end = DateUtil.parse("2022-12-29 18:00:00");
 		Stats stats = searchService.timeOutQuery(start, end);
 		System.out.println("stats.getMax()：" + stats.getMax());
 		System.out.println("stats.getCount()：" + stats.getCount());

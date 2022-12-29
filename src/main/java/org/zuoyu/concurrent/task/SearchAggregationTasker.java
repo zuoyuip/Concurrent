@@ -16,6 +16,7 @@ import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilters;
 import org.zuoyu.concurrent.constant.Modules;
 import org.zuoyu.concurrent.constant.QueryParams;
 import org.zuoyu.concurrent.constant.Status;
+import org.zuoyu.concurrent.maker.Switcher;
 import org.zuoyu.concurrent.model.SearchAggregation;
 import org.zuoyu.concurrent.model.SearchResult;
 
@@ -52,6 +53,9 @@ public class SearchAggregationTasker {
 	@Scheduled(cron = "0 * * * * ? ")
 	@Async("scheduledPoolTaskExecutor")
 	public void searchAggregation() {
+		if (!Switcher.isOpenSearchService()) {
+			return;
+		}
 		DateTime nowDateTime = DateUtil.dateSecond();
 		DateTime offsetMinute = DateUtil.offsetMinute(nowDateTime, -1);
 
@@ -90,6 +94,9 @@ public class SearchAggregationTasker {
 
 			// 总数量
 			long countQueryBucketDocCount = countQueryBucket.getDocCount();
+			if (countQueryBucketDocCount == 0L) {
+				return;
+			}
 			// 有效数据量
 			long validQueryBucketDocCount = validQueryBucket.getDocCount();
 			// 成功数据量

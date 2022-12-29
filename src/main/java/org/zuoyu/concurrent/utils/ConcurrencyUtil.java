@@ -40,7 +40,6 @@ public class ConcurrencyUtil {
 	 * 并发
 	 * @param tasks - 任务集合
 	 * @param permits - 并发数量
-	 * @throws InterruptedException
 	 */
 	public static boolean startTask(@NonNull final Set<Runnable> tasks, final int permits) throws InterruptedException {
 		// 用于控制并发数

@@ -19,9 +19,14 @@ public interface SearchService {
 
 
 	/**
-	 * 询价
+	 * 启动询价服务
 	 */
-	void search();
+	void runSearchService();
+
+	/**
+	 * 停止询价服务
+	 */
+	void stopSearchService();
 
 	/**
 	 * 检索询价结果

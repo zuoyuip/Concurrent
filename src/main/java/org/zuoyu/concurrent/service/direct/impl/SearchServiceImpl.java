@@ -18,6 +18,7 @@ import cn.hutool.log.Log;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -27,6 +28,7 @@ import org.elasticsearch.search.aggregations.metrics.Stats;
 import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
 import org.zuoyu.concurrent.constant.Modules;
 import org.zuoyu.concurrent.constant.Status;
+import org.zuoyu.concurrent.maker.Switcher;
 import org.zuoyu.concurrent.model.SearchResult;
 import org.zuoyu.concurrent.model.vo.GdsPolicy;
 import org.zuoyu.concurrent.model.vo.direct.request.CtripSearchReq;
@@ -63,10 +65,11 @@ import org.springframework.web.client.RestTemplate;
  * @Version 1.0
  */
 @Service
+@Slf4j
 public class SearchServiceImpl implements SearchService {
 
-	//	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/search";
-	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
+	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/search";
+//	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
 
 	private static final String SUCCESS = "成功";
 
@@ -86,13 +89,30 @@ public class SearchServiceImpl implements SearchService {
 		this.indexCoordinates = elasticsearchRestTemplate.getIndexCoordinatesFor(SearchResult.class);
 		Set<GdsPolicy> gdsPolicySet = gdsPolicyService.getGdsPolicySet();
 		this.ctripSearchReqs = ReqBuilderUtil.getCtripSearchReqSet(gdsPolicySet);
+		log.info("------启动成功------");
+	}
+
+	/**
+	 * 启动询价服务
+	 */
+	@Override
+	public void runSearchService() {
+		Switcher.openSearchService();
+		ThreadUtil.execute(this::search);
+	}
+
+	/**
+	 * 停止询价服务
+	 */
+	@Override
+	public void stopSearchService() {
+		Switcher.closeSearchService();
 	}
 
 
 	/**
 	 * 询价
 	 */
-	@Override
 	public void search() {
 		Set<Runnable> runnableList = ctripSearchReqs.stream().map(ctripSearchReq -> (Runnable) () -> {
 			Stopwatch stopwatch = Stopwatch.createStarted();
@@ -142,8 +162,13 @@ public class SearchServiceImpl implements SearchService {
 		}).collect(Collectors.toSet());
 		try {
 			do {
+				// 控制开关，及时关闭
+				if (!Switcher.isOpenSearchService()) {
+					break;
+				}
 				ThreadUtil.sleep(1, TimeUnit.SECONDS);
 			}
+			// 执行并发请求
 			while (ConcurrencyUtil.startTask(RandomUtil.randomEleSet(runnableList, 1000), 1000));
 		}
 		catch (InterruptedException e) {

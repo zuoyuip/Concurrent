@@ -1,15 +1,20 @@
 package org.zuoyu.concurrent;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Test;
+import org.zuoyu.concurrent.maker.Switcher;
 
 /**
  * @Description TODO 日期测试
@@ -34,5 +39,39 @@ public class DataTest {
 				.cartesianProduct(Sets.newHashSet(dateRange1.iterator()), Sets.newHashSet(dateRange2.iterator()));
 
 		lists.forEach(System.out::println);
+	}
+
+	@SneakyThrows
+	@Test
+	void stopWatch() {
+//		Switcher.startWatch();
+//		TimeUnit.SECONDS.sleep(5);
+//		System.out.println(Switcher.watchInfo());
+//
+//
+//		TimeUnit.SECONDS.sleep(1);
+//		System.out.println("-------------------");
+//		System.out.println(Switcher.watchInfo());
+//
+//		System.out.println("-----------------------------------------------");
+//
+//		Switcher.startWatch();
+//		TimeUnit.SECONDS.sleep(5);
+//		System.out.println(Switcher.watchInfo());
+//		Switcher.stopWatch();
+//
+//		TimeUnit.SECONDS.sleep(1);
+//		System.out.println("-------------------");
+		System.out.println(Switcher.watchInfo());
+	}
+
+	boolean service() {
+		System.out.println("---------service----------");
+		return true;
+	}
+
+	@Test
+	void testWhile() {
+		System.out.println(DateUtil.parse("2022-12-29 18:00:18").getTime());
 	}
 }
