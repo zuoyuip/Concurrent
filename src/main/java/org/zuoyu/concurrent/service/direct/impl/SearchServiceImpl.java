@@ -34,6 +34,7 @@ import org.zuoyu.concurrent.model.vo.GdsPolicy;
 import org.zuoyu.concurrent.model.vo.direct.request.CtripSearchReq;
 import org.zuoyu.concurrent.model.vo.direct.vo.CtripQDirectVo;
 import org.zuoyu.concurrent.service.direct.SearchService;
+import org.zuoyu.concurrent.service.direct.VerifyService;
 import org.zuoyu.concurrent.service.policy.GdsPolicyService;
 import org.zuoyu.concurrent.utils.ConcurrencyUtil;
 import org.zuoyu.concurrent.utils.ReqBuilderUtil;
@@ -83,14 +84,19 @@ public class SearchServiceImpl implements SearchService {
 
 	private final IndexCoordinates indexCoordinates;
 
-	public SearchServiceImpl(@NonNull GdsPolicyService gdsPolicyService, RestTemplate restTemplate, @NonNull ElasticsearchRestTemplate elasticsearchRestTemplate) {
+	private final VerifyService verifyService;
+
+	public SearchServiceImpl(@NonNull GdsPolicyService gdsPolicyService, RestTemplate restTemplate, @NonNull ElasticsearchRestTemplate elasticsearchRestTemplate, VerifyService verifyService) {
 		this.restTemplate = restTemplate;
 		this.elasticsearchRestTemplate = elasticsearchRestTemplate;
 		this.indexCoordinates = elasticsearchRestTemplate.getIndexCoordinatesFor(SearchResult.class);
+		this.verifyService = verifyService;
 		Set<GdsPolicy> gdsPolicySet = gdsPolicyService.getGdsPolicySet();
 		this.ctripSearchReqs = ReqBuilderUtil.getCtripSearchReqSet(gdsPolicySet);
 		log.info("------启动成功------");
 	}
+
+
 
 	/**
 	 * 启动询价服务
@@ -143,6 +149,10 @@ public class SearchServiceImpl implements SearchService {
 					searchResult.setMessage(body.getMsg());
 					if (body.getMsg().contains(SUCCESS)) {
 						searchResult.setIsValid(Boolean.TRUE);
+						if (Switcher.isOpenVerifyService()) {
+							// 异步进行验价
+							ThreadUtil.execute(() -> verifyService.verify(body));
+						}
 					}
 					else {
 						searchResult.setIsValid(Boolean.FALSE);

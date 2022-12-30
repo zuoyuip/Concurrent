@@ -1,6 +1,5 @@
 package org.zuoyu.concurrent;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -9,10 +8,8 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Test;
 import org.zuoyu.concurrent.maker.Switcher;
 
@@ -44,24 +41,24 @@ public class DataTest {
 	@SneakyThrows
 	@Test
 	void stopWatch() {
-//		Switcher.startWatch();
-//		TimeUnit.SECONDS.sleep(5);
-//		System.out.println(Switcher.watchInfo());
-//
-//
-//		TimeUnit.SECONDS.sleep(1);
-//		System.out.println("-------------------");
-//		System.out.println(Switcher.watchInfo());
-//
-//		System.out.println("-----------------------------------------------");
-//
-//		Switcher.startWatch();
-//		TimeUnit.SECONDS.sleep(5);
-//		System.out.println(Switcher.watchInfo());
-//		Switcher.stopWatch();
-//
-//		TimeUnit.SECONDS.sleep(1);
-//		System.out.println("-------------------");
+		Switcher.startWatch();
+		TimeUnit.SECONDS.sleep(5);
+		System.out.println(Switcher.watchInfo());
+
+
+		TimeUnit.SECONDS.sleep(1);
+		System.out.println("-------------------");
+		System.out.println(Switcher.watchInfo());
+
+		System.out.println("-----------------------------------------------");
+
+		Switcher.startWatch();
+		TimeUnit.SECONDS.sleep(5);
+		System.out.println(Switcher.watchInfo());
+		Switcher.stopWatch();
+
+		TimeUnit.SECONDS.sleep(1);
+		System.out.println("-------------------");
 		System.out.println(Switcher.watchInfo());
 	}
 

@@ -1,5 +1,7 @@
 package org.zuoyu.concurrent.model;
 
+import org.zuoyu.concurrent.model.vo.direct.vo.CtripQDirectVo;
+
 import org.springframework.data.elasticsearch.annotations.Document;
 
 /**
@@ -10,7 +12,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
  * @Version 1.0
  */
 @Document(indexName = "verify_result")
-public class VerifyResult extends Result {
+public class VerifyResult extends Result<CtripQDirectVo.CtripQOrderResponse> {
 
 	private static final long serialVersionUID = -4453671058712747927L;
 }

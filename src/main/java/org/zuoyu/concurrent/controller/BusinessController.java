@@ -60,19 +60,19 @@ public class BusinessController {
 	}
 
 	/**
-	 * 启动询价服务
+	 * 启动验价服务
 	 */
 	@GetMapping("runVerify")
 	public void runVerifyService() {
-
+		Switcher.openVerifyService();
 	}
 
 	/**
-	 * 停止询价服务
+	 * 停止验价服务
 	 */
 	@GetMapping("stopVerify")
 	public void stopVerifyService() {
-
+		Switcher.closeVerifyService();
 	}
 
 	/**
