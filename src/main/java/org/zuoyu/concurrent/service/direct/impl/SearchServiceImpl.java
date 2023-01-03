@@ -69,8 +69,8 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class SearchServiceImpl implements SearchService {
 
-	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/search";
-//	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
+//	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/search";
+	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
 
 	private static final String SUCCESS = "成功";
 
@@ -93,7 +93,30 @@ public class SearchServiceImpl implements SearchService {
 		this.verifyService = verifyService;
 		Set<GdsPolicy> gdsPolicySet = gdsPolicyService.getGdsPolicySet();
 		this.ctripSearchReqs = ReqBuilderUtil.getCtripSearchReqSet(gdsPolicySet);
-		log.info("------启动成功------");
+		log.info("/***\n" +
+				" *      ┌─┐       ┌─┐\n" +
+				" *   ┌──┘ ┴───────┘ ┴──┐\n" +
+				" *   │                 │\n" +
+				" *   │       ───       │\n" +
+				" *   │  ─┬┘       └┬─  │\n" +
+				" *   │                 │\n" +
+				" *   │       ─┴─       │\n" +
+				" *   │                 │\n" +
+				" *   └───┐         ┌───┘\n" +
+				" *       │         │\n" +
+				" *       │         │\n" +
+				" *       │         │\n" +
+				" *       │         └──────────────┐\n" +
+				" *       │                        │\n" +
+				" *       │                        ├─┐\n" +
+				" *       │                        ┌─┘\n" +
+				" *       │                        │\n" +
+				" *       └─┐  ┐  ┌───────┬──┐  ┌──┘\n" +
+				" *         │ ─┤ ─┤       │ ─┤ ─┤\n" +
+				" *         └──┴──┘       └──┴──┘\n" +
+				" *                           \n" +
+				" *           压测系统启动成功!\n" +
+				" */");
 	}
 
 
@@ -179,7 +202,7 @@ public class SearchServiceImpl implements SearchService {
 				ThreadUtil.sleep(1, TimeUnit.SECONDS);
 			}
 			// 执行并发请求
-			while (ConcurrencyUtil.startTask(RandomUtil.randomEleSet(runnableList, 1000), 1000));
+			while (ConcurrencyUtil.startTask(RandomUtil.randomEleSet(runnableList, 1000), 100));
 		}
 		catch (InterruptedException e) {
 			Log.get().error(ExceptionUtil.getRootCauseMessage(e));

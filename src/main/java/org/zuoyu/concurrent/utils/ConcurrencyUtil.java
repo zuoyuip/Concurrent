@@ -7,6 +7,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.util.NamedThreadFactory;
 
 import org.springframework.lang.NonNull;
@@ -18,6 +20,7 @@ import org.springframework.lang.NonNull;
  * @Date 2022/12/13 17:52
  * @Version 1.0
  */
+@Slf4j
 public class ConcurrencyUtil {
 
 	/**
@@ -42,33 +45,29 @@ public class ConcurrencyUtil {
 	 * @param permits - 并发数量
 	 */
 	public static boolean startTask(@NonNull final Set<Runnable> tasks, final int permits) throws InterruptedException {
-		// 用于控制并发数
+		// 用于控制并发数（限制）
 		final Semaphore semaphore = new Semaphore(permits);
-		// 闭锁
+		// 闭锁（聚集线程，释放以达到一起执行）
 		final CountDownLatch countDownLatch = new CountDownLatch(tasks.size());
-		tasks.forEach(task -> {
-			THREAD_POOL_EXECUTOR.execute(() -> {
-				try {
-					try {
-						// 获取执行许可，否则线程阻塞等待，直到获取许可
-						semaphore.acquire();
-						// 执行逻辑
-						task.run();
-						// 释放许可
-						semaphore.release();
-					}
-					finally {
-						// 将闭锁减1，减到0时，就可以开启执行了
-						countDownLatch.countDown();
-					}
-				}
-				catch (InterruptedException ie) {
-					ie.printStackTrace();
-				}
-			});
-		});
+		tasks.forEach(task -> THREAD_POOL_EXECUTOR.execute(() -> {
+			try {
+				// 获取执行许可，否则线程阻塞等待，直到获取许可
+				semaphore.acquire();
+				// 执行逻辑
+				task.run();
+			}
+			catch (InterruptedException ie) {
+				log.info(ExceptionUtil.getRootCauseMessage(ie));
+			}
+			finally {
+				// 释放许可
+				semaphore.release();
+				// 将闭锁减1，减到0时，就可以开启执行了
+				countDownLatch.countDown();
+			}
+		}));
 
-		// 线程阻塞，直到闭锁为0时，阻塞才会释放
+		// 线程阻塞，直到闭锁为0时，阻塞才会释放，达到一起执行
 		countDownLatch.await();
 		return true;
 	}
