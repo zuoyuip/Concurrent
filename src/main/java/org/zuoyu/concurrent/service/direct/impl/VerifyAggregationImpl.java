@@ -10,7 +10,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.zuoyu.concurrent.service.direct.SearchAggregation;
+import org.zuoyu.concurrent.service.direct.VerifyAggregation;
 import org.zuoyu.concurrent.vo.Result;
 
 import org.springframework.data.domain.Sort;
@@ -19,22 +19,21 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
  * @Description TODO
  * @Author z
  * @Email zuoyuip@foxmail.com
- * @Date 2022/12/28 11:53
+ * @Date 2023/1/4 15:27
  * @Version 1.0
  */
 @Service
-public class SearchAggregationImpl implements SearchAggregation {
+public class VerifyAggregationImpl implements VerifyAggregation {
 
 	private final ElasticsearchRestTemplate elasticsearchRestTemplate;
 
-	public SearchAggregationImpl(ElasticsearchRestTemplate elasticsearchRestTemplate) {
+	public VerifyAggregationImpl(ElasticsearchRestTemplate elasticsearchRestTemplate) {
 		this.elasticsearchRestTemplate = elasticsearchRestTemplate;
 	}
 
@@ -45,7 +44,7 @@ public class SearchAggregationImpl implements SearchAggregation {
 	 * @return 聚合信息
 	 */
 	@Override
-	public Result search(@NonNull Date start, @NonNull Date end) {
+	public Result search(Date start, Date end) {
 		// 构建查询条件
 		RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("dateTime")
 				.from(start.getTime(), false).to(end.getTime(), false);
@@ -53,30 +52,30 @@ public class SearchAggregationImpl implements SearchAggregation {
 		NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder().withSort(Sort.by("dateTime"))
 				.withQuery(rangeQueryBuilder).build();
 		nativeSearchQuery.setMaxResults(10000);
-		SearchHits<org.zuoyu.concurrent.model.SearchAggregation> searchHits = elasticsearchRestTemplate
-				.search(nativeSearchQuery, org.zuoyu.concurrent.model.SearchAggregation.class);
-		List<org.zuoyu.concurrent.model.SearchAggregation> searchAggregations = searchHits.stream()
+		SearchHits<org.zuoyu.concurrent.model.VerifyAggregation> searchHits = elasticsearchRestTemplate
+				.search(nativeSearchQuery, org.zuoyu.concurrent.model.VerifyAggregation.class);
+		List<org.zuoyu.concurrent.model.VerifyAggregation> verifyAggregations = searchHits.stream()
 				.map(SearchHit::getContent)
 				.sorted(Comparator
-						.comparing(org.zuoyu.concurrent.model.SearchAggregation::getDateTime))
+						.comparing(org.zuoyu.concurrent.model.VerifyAggregation::getDateTime))
 				.collect(Collectors.toList());
 
 		Result result = new Result();
-		result.setCount(searchAggregations.stream().map(org.zuoyu.concurrent.model.SearchAggregation::getCount)
+		result.setCount(verifyAggregations.stream().map(org.zuoyu.concurrent.model.VerifyAggregation::getCount)
 				.collect(Collectors.toList()));
-		result.setDateTime(searchAggregations.stream().map(org.zuoyu.concurrent.model.SearchAggregation::getDateTime)
+		result.setDateTime(verifyAggregations.stream().map(org.zuoyu.concurrent.model.VerifyAggregation::getDateTime)
 				.map(time -> DateUtil.date(time).toString(DatePattern.NORM_DATETIME_FORMAT))
 				.collect(Collectors.toList()));
-		result.setSuccessRate(searchAggregations.stream()
+		result.setSuccessRate(verifyAggregations.stream()
 				.map(searchAggregation -> NumberUtil.mul(searchAggregation.getSuccessRate(), new Double(100)))
 				.collect(Collectors.toList()));
-		result.setFailRate(searchAggregations.stream()
+		result.setFailRate(verifyAggregations.stream()
 				.map(searchAggregation -> NumberUtil.mul(searchAggregation.getFailRate(), new Double(100)))
 				.collect(Collectors.toList()));
-		result.setValidRate(searchAggregations.stream()
+		result.setValidRate(verifyAggregations.stream()
 				.map(searchAggregation -> NumberUtil.mul(searchAggregation.getValidRate(), new Double(100)))
 				.collect(Collectors.toList()));
-		result.setTimeOutRate(searchAggregations.stream()
+		result.setTimeOutRate(verifyAggregations.stream()
 				.map(searchAggregation -> NumberUtil.mul(searchAggregation.getTimeOutRate(), new Double(100)))
 				.collect(Collectors.toList()));
 		return result;

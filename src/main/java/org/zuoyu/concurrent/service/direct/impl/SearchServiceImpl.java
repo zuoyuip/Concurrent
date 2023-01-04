@@ -202,7 +202,8 @@ public class SearchServiceImpl implements SearchService {
 				ThreadUtil.sleep(1, TimeUnit.SECONDS);
 			}
 			// 执行并发请求
-			while (ConcurrencyUtil.startTask(RandomUtil.randomEleSet(runnableList, 1000), 100));
+			while (ConcurrencyUtil
+					.startTask(RandomUtil.randomEleSet(runnableList, 500), 500));
 		}
 		catch (InterruptedException e) {
 			Log.get().error(ExceptionUtil.getRootCauseMessage(e));

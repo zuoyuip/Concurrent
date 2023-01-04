@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateTime;
 import org.zuoyu.concurrent.maker.Switcher;
 import org.zuoyu.concurrent.service.direct.SearchAggregation;
 import org.zuoyu.concurrent.service.direct.SearchService;
+import org.zuoyu.concurrent.service.direct.VerifyAggregation;
 import org.zuoyu.concurrent.vo.Req;
 import org.zuoyu.concurrent.vo.Result;
 import org.zuoyu.concurrent.vo.Watcher;
@@ -30,9 +31,12 @@ public class BusinessController {
 
 	private final SearchAggregation searchAggregation;
 
-	public BusinessController(SearchService searchService, SearchAggregation searchAggregation) {
+	private final VerifyAggregation verifyAggregation;
+
+	public BusinessController(SearchService searchService, SearchAggregation searchAggregation, VerifyAggregation verifyAggregation) {
 		this.searchService = searchService;
 		this.searchAggregation = searchAggregation;
+		this.verifyAggregation = verifyAggregation;
 	}
 
 	/**
@@ -92,14 +96,26 @@ public class BusinessController {
 	}
 
 	/**
-	 * 查询聚合数据
+	 * 询价聚合数据
 	 * @param req - 请求
 	 * @return 聚合数据
 	 */
-	@PostMapping("aggregation")
+	@PostMapping("searchAggregation")
 	public Result searchAggregation(@RequestBody @NonNull Req req) {
 		DateTime start = req.getStart();
 		DateTime end = req.getEnd();
 		return searchAggregation.search(start, end);
+	}
+
+	/**
+	 * 验价聚合数据
+	 * @param req - 请求
+	 * @return 聚合数据
+	 */
+	@PostMapping("verifyAggregation")
+	public Result verifyAggregation(@RequestBody @NonNull Req req) {
+		DateTime start = req.getStart();
+		DateTime end = req.getEnd();
+		return verifyAggregation.search(start, end);
 	}
 }

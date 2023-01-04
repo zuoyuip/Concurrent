@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
  * @Version 1.0
  */
 @Document(indexName = "verify_aggregation")
-public class VerifyAggregation extends Aggregation{
+public class VerifyAggregation extends Aggregation {
 
 	private static final long serialVersionUID = -4964739297126262923L;
 

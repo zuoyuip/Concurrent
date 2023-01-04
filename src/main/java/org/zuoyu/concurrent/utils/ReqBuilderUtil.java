@@ -1,7 +1,6 @@
 package org.zuoyu.concurrent.utils;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,7 +9,6 @@ import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Sets;
-import org.zuoyu.concurrent.enmus.TripTypeEnum;
 import org.zuoyu.concurrent.model.vo.GdsPolicy;
 import org.zuoyu.concurrent.model.vo.direct.request.CtripSearchReq;
 
@@ -33,7 +31,7 @@ public final class ReqBuilderUtil {
 	private static final String CID = "szjzkj_gj";
 
 	/**
-	 * 获取请求集合
+	 * 获取请求集合（根据笛卡尔积进行组合请求）
 	 * @param gdsPolicySet - 政策集合
 	 * @return 请求
 	 */
@@ -43,30 +41,14 @@ public final class ReqBuilderUtil {
 			DateRange goDateRange = DateUtil.range(gdsPolicy.getGoFlightDateStart(), gdsPolicy
 					.getGoFlightDateEnd(), DateField.DAY_OF_MONTH);
 			Set<DateTime> goFlightTimes = Sets.newHashSet(goDateRange.iterator());
-			// 行程类型
-			Integer tripType = gdsPolicy.getTripType();
-			if (TripTypeEnum.ROUND.getValue().equals(tripType)) {
-				// 返程日期范围
-				DateRange retDateRange = DateUtil.range(gdsPolicy.getRetFlightDateStart(), gdsPolicy
-						.getRetFlightDateEnd(), DateField.DAY_OF_MONTH);
-				Set<DateTime> retFlightTimes = Sets.newHashSet(retDateRange.iterator());
-				Set<List<DateTime>> cartesianSet = Sets.cartesianProduct(goFlightTimes, retFlightTimes);
-				// 根据笛卡尔积组合往返类型
-				return cartesianSet.stream().map(cartesian -> {
-					CtripSearchReq ctripSearchReq = ctripSearchReq(gdsPolicy);
-					ctripSearchReq.setFromDate(cartesian.get(0).toString(FLIGHT_DATE_PATTERN));
-					ctripSearchReq.setRetDate(cartesian.get(1).toString(FLIGHT_DATE_PATTERN));
-					return ctripSearchReq;
-				}).collect(Collectors.toSet());
-			}
-			else {
-				// 根据去程范围例举单程
-				return goFlightTimes.stream().map(goFlightTime -> {
-					CtripSearchReq ctripSearchReq = ctripSearchReq(gdsPolicy);
-					ctripSearchReq.setFromDate(goFlightTime.toString(FLIGHT_DATE_PATTERN));
-					return ctripSearchReq;
-				}).collect(Collectors.toSet());
-			}
+			// 目前只询价单程
+
+			// 根据去程范围例举单程
+			return goFlightTimes.stream().map(goFlightTime -> {
+				CtripSearchReq ctripSearchReq = ctripSearchReq(gdsPolicy);
+				ctripSearchReq.setFromDate(goFlightTime.toString(FLIGHT_DATE_PATTERN));
+				return ctripSearchReq;
+			}).collect(Collectors.toSet());
 
 		}).flatMap(Collection::stream).collect(Collectors.toSet());
 	}

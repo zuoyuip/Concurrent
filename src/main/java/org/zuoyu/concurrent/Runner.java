@@ -2,6 +2,8 @@ package org.zuoyu.concurrent;
 
 import org.zuoyu.concurrent.model.SearchAggregation;
 import org.zuoyu.concurrent.model.SearchResult;
+import org.zuoyu.concurrent.model.VerifyAggregation;
+import org.zuoyu.concurrent.model.VerifyResult;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -46,6 +48,20 @@ public class Runner implements CommandLineRunner {
 		if (!searchAggregationIndexOperations.exists()) {
 			searchAggregationIndexOperations.create();
 			searchAggregationIndexOperations.putMapping();
+		}
+
+		// 验价结果
+		IndexOperations verifyResultIndexOperations = elasticsearchRestTemplate.indexOps(VerifyResult.class);
+		if (!verifyResultIndexOperations.exists()) {
+			verifyResultIndexOperations.create();
+			verifyResultIndexOperations.putMapping();
+		}
+
+		// 验价聚合
+		IndexOperations verifyAggregationIndexOperations = elasticsearchRestTemplate.indexOps(VerifyAggregation.class);
+		if (!verifyAggregationIndexOperations.exists()) {
+			verifyAggregationIndexOperations.create();
+			verifyAggregationIndexOperations.putMapping();
 		}
 	}
 }
