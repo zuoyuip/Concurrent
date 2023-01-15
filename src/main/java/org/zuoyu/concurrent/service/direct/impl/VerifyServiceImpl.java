@@ -52,8 +52,8 @@ public class VerifyServiceImpl implements VerifyService {
 
 	private static final long TIME_OUT = 10000;
 
-	//	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/verify";
-	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/verify";
+		private static final String URL = "http://106.14.157.239:8087/international/ctrip_szjz/verify";
+//	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/verify";
 
 
 	private final RestTemplate restTemplate;

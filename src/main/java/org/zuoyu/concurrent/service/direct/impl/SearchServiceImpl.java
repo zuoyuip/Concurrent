@@ -69,14 +69,12 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class SearchServiceImpl implements SearchService {
 
-//	private static final String URL = "http://192.168.1.99:8080/foreign/international/ctrip_szjz/search";
-	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
+	private static final String URL = "http://106.14.157.239:8087/international/ctrip_szjz/search";
+//	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
 
 	private static final String SUCCESS = "成功";
 
 	private static final long TIME_OUT = 7000;
-
-	private final Set<CtripSearchReq> ctripSearchReqs;
 
 	private final RestTemplate restTemplate;
 
@@ -86,13 +84,14 @@ public class SearchServiceImpl implements SearchService {
 
 	private final VerifyService verifyService;
 
+	private final Set<GdsPolicy> gdsPolicySet;
+
 	public SearchServiceImpl(@NonNull GdsPolicyService gdsPolicyService, RestTemplate restTemplate, @NonNull ElasticsearchRestTemplate elasticsearchRestTemplate, VerifyService verifyService) {
 		this.restTemplate = restTemplate;
 		this.elasticsearchRestTemplate = elasticsearchRestTemplate;
 		this.indexCoordinates = elasticsearchRestTemplate.getIndexCoordinatesFor(SearchResult.class);
 		this.verifyService = verifyService;
-		Set<GdsPolicy> gdsPolicySet = gdsPolicyService.getGdsPolicySet();
-		this.ctripSearchReqs = ReqBuilderUtil.getCtripSearchReqSet(gdsPolicySet);
+		this.gdsPolicySet = gdsPolicyService.getGdsPolicySet();
 		log.info("/***\n" +
 				" *      ┌─┐       ┌─┐\n" +
 				" *   ┌──┘ ┴───────┘ ┴──┐\n" +
@@ -143,10 +142,12 @@ public class SearchServiceImpl implements SearchService {
 	 * 询价
 	 */
 	public void search() {
+		Set<CtripSearchReq> ctripSearchReqs = ReqBuilderUtil.getCtripSearchReqSet(gdsPolicySet);
 		Set<Runnable> runnableList = ctripSearchReqs.stream().map(ctripSearchReq -> (Runnable) () -> {
 			Stopwatch stopwatch = Stopwatch.createStarted();
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+			log.info(JSON.toJSONString(ctripSearchReq));
 			HttpEntity<String> httpEntity = new HttpEntity<>(JSON.toJSONString(ctripSearchReq), httpHeaders);
 			ResponseEntity<CtripQDirectVo.CtripQSearchResponse> responseEntity = restTemplate
 					.postForEntity(URL, httpEntity, CtripQDirectVo.CtripQSearchResponse.class);
@@ -174,7 +175,7 @@ public class SearchServiceImpl implements SearchService {
 						searchResult.setIsValid(Boolean.TRUE);
 						if (Switcher.isOpenVerifyService()) {
 							// 异步进行验价
-							ThreadUtil.execute(() -> verifyService.verify(body));
+							VERIFY_THREAD_POOL_EXECUTOR.execute(() -> verifyService.verify(body));
 						}
 					}
 					else {
@@ -190,7 +191,7 @@ public class SearchServiceImpl implements SearchService {
 					searchResult.setStatus(Status.FAIL);
 				}
 			}
-			elasticsearchRestTemplate.save(searchResult);
+			ELASTICSEARCH_THREAD_POOL_EXECUTOR.execute(() -> elasticsearchRestTemplate.save(searchResult));
 
 		}).collect(Collectors.toSet());
 		try {

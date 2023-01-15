@@ -1,6 +1,8 @@
 package org.zuoyu.concurrent.utils;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,8 @@ import org.springframework.lang.NonNull;
  */
 public final class ReqBuilderUtil {
 
+	private static final Set<CtripSearchReq> EMPTY_CTRIP_SEARCH_REQS = Collections.emptySet();
+
 	/**
 	 * 航班时间格式
 	 */
@@ -36,10 +40,24 @@ public final class ReqBuilderUtil {
 	 * @return 请求
 	 */
 	public static Set<CtripSearchReq> getCtripSearchReqSet(@NonNull Set<GdsPolicy> gdsPolicySet) {
+
 		return gdsPolicySet.stream().map(gdsPolicy -> {
-			// 去程日期范围
-			DateRange goDateRange = DateUtil.range(gdsPolicy.getGoFlightDateStart(), gdsPolicy
-					.getGoFlightDateEnd(), DateField.DAY_OF_MONTH);
+			Date flightDateStart = gdsPolicy.getGoFlightDateStart();
+			Date flightDateEnd = gdsPolicy.getGoFlightDateEnd();
+			DateTime dateTime = DateUtil.date().offset(DateField.DAY_OF_MONTH, 1);
+
+			// 如果最晚日期不在明天之后，不测试此政策
+			if (flightDateEnd.before(dateTime.toJdkDate())) {
+				return EMPTY_CTRIP_SEARCH_REQS;
+			}
+
+			// 如果开始日期不在明天之后，则把测试范围往后移动
+			if (flightDateStart.before(dateTime.toJdkDate())) {
+				flightDateStart = dateTime.toJdkDate();
+			}
+
+			// 去程日期范围（这里需要调整日期为从当前日期起）
+			DateRange goDateRange = DateUtil.range(flightDateStart, flightDateEnd, DateField.DAY_OF_MONTH);
 			Set<DateTime> goFlightTimes = Sets.newHashSet(goDateRange.iterator());
 			// 目前只询价单程
 

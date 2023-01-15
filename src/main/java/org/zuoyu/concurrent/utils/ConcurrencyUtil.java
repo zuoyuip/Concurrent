@@ -27,6 +27,7 @@ public class ConcurrencyUtil {
 	 * CPU核心线程数量
 	 */
 	private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+
 	/**
 	 * 根据服务器cpu自定义线程池
 	 */
