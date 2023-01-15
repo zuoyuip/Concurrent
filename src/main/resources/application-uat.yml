@@ -1,0 +1,31 @@
+server:
+  port: 9100
+spring:
+  elasticsearch:
+    uris:
+      - 47.101.39.4:9200
+    username: root
+    password: root
+    connection-timeout: 10
+  redis:
+    lettuce:
+      pool:
+        max-active: 1024 # 连接池最大连接数（默认为8，-1表示无限制 如果pool已经分配了超过max_active个jedis实例，则此时pool为耗尽）
+        max-wait: 10000 #最大等待连接时间，单位毫秒 默认为-1，表示永不超时，超时会抛出JedisConnectionException
+        max-idle: 10
+        min-idle: 5
+      shutdown-timeout: 100
+    cluster:
+      nodes:
+        - 172.27.7.201:7001
+        - 172.27.7.201:7002
+        - 172.27.7.201:7003
+        - 172.27.7.201:7004
+        - 172.27.7.201:7005
+        - 172.27.7.201:7006
+      max-redirects: 3
+    password: love@hmyd
+    timeout: 20000
+logging:
+  level:
+    org.elasticsearch.client.RestClient: off
