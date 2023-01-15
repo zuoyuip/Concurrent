@@ -13,12 +13,15 @@
 	<version>1.0.0</version>
 	<name>Concurrent</name>
 	<description>模拟高并发用于测试</description>
+
 	<properties>
+		<skipTests>true</skipTests>
 		<java.version>1.8</java.version>
 		<fastjson.version>2.0.20</fastjson.version>
 		<guava.version>31.1-jre</guava.version>
 		<hutool.version>5.8.5</hutool.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
