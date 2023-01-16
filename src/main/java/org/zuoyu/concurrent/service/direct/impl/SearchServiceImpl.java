@@ -69,7 +69,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class SearchServiceImpl implements SearchService {
 
-	private static final String URL = "http://106.14.157.239:8087/international/ctrip_szjz/search";
+	private static final String URL = "http://172.27.7.202:8087/international/ctrip_szjz/search";
 //	private static final String URL = "http://47.102.104.115:8087/international/ctrip_szjz/search";
 
 	private static final String SUCCESS = "成功";
